@@ -6,7 +6,7 @@ namespace Vertigo2 {
     /// <summary>
     /// a trigger zone where objects should not interact with water. Intended for the inside of boats below the waterline
     /// </summary>
-    public class WaterMask : MonoBehaviour
+    public class VWaterMask : MonoBehaviour
     {
         private void OnTriggerEnter(Collider other)
         {
