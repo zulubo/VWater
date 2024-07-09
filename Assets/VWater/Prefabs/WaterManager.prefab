@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4884402606482680714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5179369448591909575}
+  - component: {fileID: 7713126596091742485}
+  - component: {fileID: 3639962052153946238}
+  m_Layer: 0
+  m_Name: WaterManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5179369448591909575
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4884402606482680714}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.622654, y: 0.8840891, z: 1.320372}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7713126596091742485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4884402606482680714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd3e2327d8b4f488a35ddffb6a7630, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dynamicsManager: {fileID: 3639962052153946238}
+  splashPrefab_Small_Light: {fileID: 6709257986575178905, guid: 86337d5cd1a9c894cbefdb9b4948a4c4, type: 3}
+  splashPrefab_Small_Heavy: {fileID: 6709257986575178905, guid: 86337d5cd1a9c894cbefdb9b4948a4c4, type: 3}
+  splashPrefab_Med_Light: {fileID: 6709257986575178905, guid: 86337d5cd1a9c894cbefdb9b4948a4c4, type: 3}
+  splashPrefab_Med_Heavy: {fileID: 6709257986575178905, guid: 7df24c8db197bff43837c4d72689a904, type: 3}
+  splashPrefab_Large_Light: {fileID: 6709257986575178905, guid: 24266f4d03d0721409bdd050bb606ef4, type: 3}
+  splashPrefab_Large_Heavy: {fileID: 6709257986575178905, guid: 24266f4d03d0721409bdd050bb606ef4, type: 3}
+  splashPrefab_bullet: {fileID: 4701162353388590960, guid: 3ef35d40c60896b46a420ecec11164b3, type: 3}
+  splashPrefab_footstep: {fileID: 4882949177673082458, guid: eaf3b51bc8584ce4292066ecb165c79a, type: 3}
+  splashVelocity: 1
+  heavySplashVelocity: 3
+--- !u!114 &3639962052153946238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4884402606482680714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a6e25123c06e944eb54aa7d160377d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  compute: {fileID: 7200000, guid: c842692fb1c204474a8418a73dcd49bb, type: 3}
+  bufferSize: 512
+  simFramerate: 60
+  universeSize: 50
+  universePos: {x: 0, y: 0}
+  followCameraGridSize: 5
+  flowMap: {fileID: 2800000, guid: c9f3a590d0e6c45629d6d810b88918a2, type: 3}
+  flowMapScale: 20

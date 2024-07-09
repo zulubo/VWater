@@ -1,0 +1,193 @@
+﻿// resolution of water buffers
+int BUFFER_SIZE;
+
+float deltaTime;
+float time;
+
+// position of water universe in world space
+float2 worldPos;
+// size of water universe
+float worldSize;
+
+// a flow map to add some chaos to the dynamics
+sampler2D _FlowMap;
+// scale of the flow map
+float flowScale;
+
+
+#define FLOW_SOURCE_MAX 4
+
+// can't pass arrays of structs, so separated flow sources into pos, radius, and amplitude arrays
+half2 fsPos[FLOW_SOURCE_MAX];
+half fsRadius[FLOW_SOURCE_MAX];
+half fsAmp[FLOW_SOURCE_MAX];
+
+
+
+#include "UnityCG.cginc"
+
+// convert pixel index to standard UVs
+float2 IDToUV(uint3 id)
+{
+    return float2(id.xy) / float(BUFFER_SIZE);
+}
+
+// center UV coordinates at 0,0
+float2 UVToCenteredCoords(float2 uv)
+{
+    return uv * 2 - 1;
+}
+
+//convert UVs to pixel index
+uint2 UVToID(float2 uv)
+{
+    return uint2(round(uv * BUFFER_SIZE));
+}
+
+// convert UVs to world position
+float2 UVToWorld(float2 uv)
+{
+    return (uv - 0.5) * worldSize + worldPos;
+}
+
+float2 WorldToUV(float2 uv)
+{
+    return((uv - worldPos) / worldSize + 0.5);
+}
+
+
+
+// core water kernel
+#pragma kernel CSWater
+
+RWTexture2D<float4> WaterBuffer;  // output buffer
+RWTexture2D<float4> SourceBuffer; // input buffer
+RWTexture2D<float4> OldBuffer;    // previous frame buffer
+
+
+[numthreads(32,32,1)]
+void CSWater (uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = IDToUV(id);
+
+    float2 worldPos = UVToWorld(uv);
+
+
+    // wave propagation
+
+    const uint w = 1;
+
+    const uint2 centerIndex = uint2(id.x, id.y);
+    const uint2 northIndex = uint2(id.x, id.y - w);
+    const uint2 eastIndex = uint2(id.x + w, id.y);
+    const uint2 southIndex = uint2(id.x, id.y + w);
+    const uint2 westIndex = uint2(id.x - w, id.y);
+        
+    float centerColor = OldBuffer[centerIndex].r;
+    float northColor = SourceBuffer[northIndex].r;
+    float southColor = SourceBuffer[southIndex].r;
+    float westColor = SourceBuffer[westIndex].r;
+    float eastColor = SourceBuffer[eastIndex].r;
+
+    // wave differentiation
+    float waveHeight = ((northColor + southColor + westColor + eastColor) / 2.0 - centerColor) * 0.99;
+
+    // write wave height to water buffer
+    float4 wb = WaterBuffer[id.xy];
+    WaterBuffer[id.xy] = float4(waveHeight, wb.gba);
+
+    // =========== Blurring / Spreading for waves and foam =============
+
+    //float2 flow = UnpackNormal(tex2Dlod(_FlowMap, float4(worldPos / flowScale, 0, 0))).xy;
+
+    //uv += flow * 0.0005 * deltaTime;
+
+    float BLUR = 0.001;
+
+    float2 blurred = WaterBuffer[UVToID(uv)].rg;
+    /*
+    // terrible box blur
+    blurred += WaterBuffer[UVToID(uv + float2(-BLUR, -BLUR))].rg;
+    blurred += WaterBuffer[UVToID(uv + float2( BLUR, -BLUR))].rg;
+    blurred += WaterBuffer[UVToID(uv + float2(-BLUR,  BLUR))].rg;
+    blurred += WaterBuffer[UVToID(uv + float2( BLUR,  BLUR))].rg;
+
+    blurred += WaterBuffer[UVToID(uv + float2(-BLUR, -BLUR)/2)].rg;
+    blurred += WaterBuffer[UVToID(uv + float2( BLUR, -BLUR)/2)].rg;
+    blurred += WaterBuffer[UVToID(uv + float2(-BLUR,  BLUR)/2)].rg;
+    blurred += WaterBuffer[UVToID(uv + float2( BLUR,  BLUR)/2)].rg;
+
+    blurred /= 8;
+    */
+
+    //waves fading out
+    blurred.r -= blurred.r * deltaTime * 0.15;
+
+    //foam fading out
+    blurred.g -= blurred.g * deltaTime * 0.3;
+
+    // copy blurred pixel to temp waterbuffer pixel
+    wb = WaterBuffer[id.xy];
+    wb.rg = blurred.rg;
+
+
+    // ==============================
+    
+
+    // add foam at wave peaks 
+    wb.g += (clamp(wb.r, 0, 10) - 0.02) * 8 * deltaTime;
+
+    wb.g = saturate(wb.g);
+
+
+    // ==============================
+
+    // add flow sources
+    for(int i = 0; i < FLOW_SOURCE_MAX; i++)
+    {
+        // just a fast radius check
+        if (dot((worldPos - fsPos[i]), (worldPos - fsPos[i])) < fsRadius[i] * fsRadius[i])
+        {
+            // add to red channel (wave height channel)
+            wb.r += deltaTime * 5 * fsAmp[i];
+        }
+    }
+
+
+    // ========= NORMAL CALCULATION ===========
+
+    float2 nrm = 0;
+    nrm.x = SourceBuffer[eastIndex].r - SourceBuffer[westIndex].r;
+    nrm.y = SourceBuffer[northIndex].r - SourceBuffer[southIndex].r;
+    nrm *= 8; // magic!
+    //nrm *= float(BUFFER_SIZE);
+
+    wb.ba = nrm;
+
+
+    // write modified wave, foam, and normal values to buffer
+    WaterBuffer[id.xy] = wb;
+}
+
+
+#pragma kernel CSOffsetBuffers
+
+// set the offset for this kernel to apply
+float2 offsetVector;
+
+
+[numthreads(32,32,1)]
+void CSOffsetBuffers (uint3 id : SV_DispatchThreadID)
+{
+    // transform UVs to world space
+    float2 uv = UVToWorld(IDToUV(id));
+    // apply offset
+    uv += offsetVector;
+    // convert back to ID
+    uint2 oid = UVToID(WorldToUV(uv));
+
+    WaterBuffer[id.xy] = SourceBuffer[oid];
+
+    
+}
+
