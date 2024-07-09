@@ -20,8 +20,8 @@
   - Shaders only support the built in render pipeline
 
 
-<img width="440" alt="View halfway underwater" src="https://github.com/zulubo/VWater/assets/29665945/e33e5882-2f7d-422d-be94-9d7ea6a1ccc7"> 
-<img width="440" alt="A boat" src="https://github.com/zulubo/VWater/assets/29665945/c8463b27-7895-43e9-ac43-be8a217f6b34">
+<img width="400" alt="View halfway underwater" src="https://github.com/zulubo/VWater/assets/29665945/e33e5882-2f7d-422d-be94-9d7ea6a1ccc7"> 
+<img width="400" alt="A boat" src="https://github.com/zulubo/VWater/assets/29665945/c8463b27-7895-43e9-ac43-be8a217f6b34">
 
 <h2>User Guide</h2>
 
